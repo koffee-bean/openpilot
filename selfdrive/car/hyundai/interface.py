@@ -30,7 +30,7 @@ class CarInterface(CarInterfaceBase):
 
     if candidate in CANFD_CAR:
       # detect HDA2 with ADAS Driving ECU
-      if Ecu.adas in [fw.ecu for fw in car_fw]:
+      if True:
         ret.flags |= HyundaiFlags.CANFD_HDA2.value
       else:
         # non-HDA2
