@@ -46,7 +46,7 @@ def create_buttons(packer, CP, cnt, btn):
     "CRUISE_BUTTONS": btn,
   }
 
-  bus = 5 if CP.flags & HyundaiFlags.CANFD_HDA2 else 6
+  bus = 1 if CP.flags & HyundaiFlags.CANFD_HDA2 else 2
   return packer.make_can_msg("CRUISE_BUTTONS", bus, values)
 
 def create_acc_cancel(packer, CP, cruise_info_copy):
@@ -100,7 +100,7 @@ def create_spas_messages(packer, frame, left_blink, right_blink):
 
   values = {
   }
-  ret.append(packer.make_can_msg("SPAS1", 5, values))
+  ret.append(packer.make_can_msg("SPAS1", 1, values))
 
   blink = 0
   if left_blink:
@@ -110,7 +110,7 @@ def create_spas_messages(packer, frame, left_blink, right_blink):
   values = {
     "BLINKER_CONTROL": blink,
   }
-  ret.append(packer.make_can_msg("SPAS2", 5, values))
+  ret.append(packer.make_can_msg("SPAS2", 1, values))
 
   return ret
 

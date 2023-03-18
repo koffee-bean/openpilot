@@ -355,18 +355,19 @@ FW_QUERY_CONFIG = FwQueryConfig(
       [HYUNDAI_VERSION_RESPONSE],
       whitelist_ecus=[Ecu.engine, Ecu.transmission, Ecu.eps, Ecu.abs, Ecu.fwdRadar],
     ),
+
     # CAN-FD queries (camera)
     Request(
       [HYUNDAI_VERSION_REQUEST_LONG],
       [HYUNDAI_VERSION_RESPONSE],
       whitelist_ecus=[Ecu.fwdCamera, Ecu.fwdRadar, Ecu.cornerRadar],
-      bus=4,
+      bus=0,
     ),
     Request(
       [HYUNDAI_VERSION_REQUEST_LONG],
       [HYUNDAI_VERSION_RESPONSE],
       whitelist_ecus=[Ecu.fwdCamera, Ecu.adas, Ecu.cornerRadar],
-      bus=5,
+      bus=1,
     ),
   ],
   extra_ecus=[
