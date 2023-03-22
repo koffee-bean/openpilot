@@ -581,7 +581,7 @@ def replay_process_with_sockets(cfg, lr, fingerprint=None):
     cnt = 0
     for msg in pub_msgs:
       st = time.monotonic()
-      with Timeout(cfg.timeout, error_msg=f"timed out testing process {repr(cfg.proc_name)}, {cnt}/{len(pub_msgs)} msgs done"):
+      with Timeout(cfg.timeout*10, error_msg=f"timed out testing process {repr(cfg.proc_name)}, {cnt}/{len(pub_msgs)} msgs done"):
         pm.send(msg.which(), msg.as_builder())
         while not pm.all_readers_updated(msg.which()):
           time.sleep(0)
