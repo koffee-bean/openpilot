@@ -42,7 +42,7 @@ class ProcessConfig:
   environ: Dict[str, str] = field(default_factory=dict)
   subtest_name: str = ""
   field_tolerances: Dict[str, float] = field(default_factory=dict)
-  timeout: float = 15.
+  timeout: int = 15
 
 
 def wait_for_event(evt):
