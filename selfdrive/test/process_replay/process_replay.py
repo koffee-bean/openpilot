@@ -5,7 +5,8 @@ import sys
 import threading
 import time
 import signal
-from collections import namedtuple
+from dataclasses import dataclass, field
+from typing import Dict, List, Optional, Callable
 
 import capnp
 
@@ -28,7 +29,20 @@ TIMEOUT = 15
 PROC_REPLAY_DIR = os.path.dirname(os.path.abspath(__file__))
 FAKEDATA = os.path.join(PROC_REPLAY_DIR, "fakedata/")
 
-ProcessConfig = namedtuple('ProcessConfig', ['proc_name', 'pub_sub', 'ignore', 'init_callback', 'should_recv_callback', 'tolerance', 'fake_pubsubmaster', 'submaster_config', 'environ', 'subtest_name', "field_tolerances"], defaults=({}, {}, "", {}))
+@dataclass
+class ProcessConfig:
+  proc_name: str
+  pub_sub: Dict[str, List[str]]
+  ignore: List[str]
+  init_callback: Optional[Callable]
+  should_recv_callback: Optional[Callable]
+  tolerance: Optional[float]
+  fake_pubsubmaster: bool
+  submaster_config: Dict[str, List[str]] = field(default_factory=dict)
+  environ: Dict[str, str] = field(default_factory=dict)
+  subtest_name: str = ""
+  field_tolerances: Dict[str, float] = field(default_factory=dict)
+  timeout: float = 15.
 
 
 def wait_for_event(evt):
@@ -365,6 +379,7 @@ CONFIGS = [
     should_recv_callback=None,
     tolerance=NUMPY_TOLERANCE,
     fake_pubsubmaster=False,
+    timeout=60, # first messages are blocking on internet assistance
   ),
   ProcessConfig(
     proc_name="torqued",
@@ -566,7 +581,7 @@ def replay_process_with_sockets(cfg, lr, fingerprint=None):
     cnt = 0
     for msg in pub_msgs:
       st = time.monotonic()
-      with Timeout(TIMEOUT*10, error_msg=f"timed out testing process {repr(cfg.proc_name)}, {cnt}/{len(pub_msgs)} msgs done"):
+      with Timeout(cfg.timeout, error_msg=f"timed out testing process {repr(cfg.proc_name)}, {cnt}/{len(pub_msgs)} msgs done"):
         pm.send(msg.which(), msg.as_builder())
         while not pm.all_readers_updated(msg.which()):
           time.sleep(0)
@@ -580,7 +595,9 @@ def replay_process_with_sockets(cfg, lr, fingerprint=None):
           m.logMonoTime = msg.logMonoTime
           log_msgs.append(m.as_reader())
         cnt += 1
-      print(f"{cnt}/{len(pub_msgs)}, took {time.monotonic()-st:.2f}s")
+
+      if time.monotonic() - st > 1.:
+        print(f"{cnt}/{len(pub_msgs)}, took {time.monotonic()-st:.2f}s")
   finally:
     managed_processes[cfg.proc_name].signal(signal.SIGKILL)
     managed_processes[cfg.proc_name].stop()
