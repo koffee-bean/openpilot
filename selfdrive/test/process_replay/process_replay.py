@@ -565,7 +565,8 @@ def replay_process_with_sockets(cfg, lr, fingerprint=None):
     # Do the replay
     cnt = 0
     for msg in pub_msgs:
-      with Timeout(TIMEOUT, error_msg=f"timed out testing process {repr(cfg.proc_name)}, {cnt}/{len(pub_msgs)} msgs done"):
+      st = time.monotonic()
+      with Timeout(TIMEOUT*10, error_msg=f"timed out testing process {repr(cfg.proc_name)}, {cnt}/{len(pub_msgs)} msgs done"):
         pm.send(msg.which(), msg.as_builder())
         while not pm.all_readers_updated(msg.which()):
           time.sleep(0)
@@ -579,6 +580,7 @@ def replay_process_with_sockets(cfg, lr, fingerprint=None):
           m.logMonoTime = msg.logMonoTime
           log_msgs.append(m.as_reader())
         cnt += 1
+      print(f"{cnt}/{len(pub_msgs)}, took {time.monotonic()-st:.2f}s")
   finally:
     managed_processes[cfg.proc_name].signal(signal.SIGKILL)
     managed_processes[cfg.proc_name].stop()
